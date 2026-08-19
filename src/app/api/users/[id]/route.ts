@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import { User } from "@/models/User";
+import { sendSuccess, sendError } from "@/lib/apiResponse";
 
 export async function GET(
   req: Request,
@@ -10,7 +11,7 @@ export async function GET(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json({ message: "User ID is required" }, { status: 400 });
+      return sendError("User ID is required", 400);
     }
 
     await connectToDatabase();
@@ -19,13 +20,13 @@ export async function GET(
     const user = await User.findById(id).select("-password").lean();
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return sendError("User not found", 404);
     }
 
-    return NextResponse.json(user, { status: 200 });
+    return sendSuccess(user);
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return sendError("Internal server error", 500, error);
   }
 }
 
@@ -38,7 +39,7 @@ export async function PUT(
     const body = await req.json();
 
     if (!id) {
-      return NextResponse.json({ message: "User ID is required" }, { status: 400 });
+      return sendError("User ID is required", 400);
     }
 
     await connectToDatabase();
@@ -50,12 +51,13 @@ export async function PUT(
     ).select("-password").lean();
 
     if (!updatedUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return sendError("User not found", 404);
     }
 
-    return NextResponse.json(updatedUser, { status: 200 });
+    return sendSuccess(updatedUser, "Profile updated successfully");
   } catch (error) {
     console.error("Error updating user profile:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return sendError("Internal server error", 500, error);
   }
 }
+

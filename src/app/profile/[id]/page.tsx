@@ -28,7 +28,8 @@ export default function ProfilePage() {
       try {
         const res = await fetch(`/api/users/${userId}`);
         if (res.ok) {
-          const data = await res.json();
+          const result = await res.json();
+          const data = result.data;
           setProfile(data);
           setEditForm({
             name: data.name || "",
@@ -58,14 +59,15 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        const updatedProfile = await res.json();
-        setProfile(updatedProfile);
+        const result = await res.json();
+        setProfile(result.data);
         setIsEditing(false);
       }
     } catch (error) {
       console.error("Failed to update profile", error);
     }
   };
+
 
   if (loading || status === "loading") {
     return <Box className="flex justify-center mt-12"><CircularProgress /></Box>;
