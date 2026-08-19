@@ -27,6 +27,23 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Direct messaging event
+  socket.on("send_message", (data) => {
+    // data: { receiverId, message: MessageObj }
+    const receiverSocket = onlineUsers.get(data.receiverId);
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("receive_message", data.message);
+    }
+  });
+
+  socket.on("messages_read", (data) => {
+    // data: { readerId, senderId }
+    const senderSocket = onlineUsers.get(data.senderId);
+    if (senderSocket) {
+      io.to(senderSocket).emit("messages_read_by_user", { readerId: data.readerId });
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
     // Find and remove user from map

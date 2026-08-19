@@ -22,6 +22,7 @@ export default function ProfilePage() {
     about: "",
     location: ""
   });
+  const [newSkill, setNewSkill] = useState("");
 
   const isOwnProfile = session?.user && (session.user as any).id === userId;
 
@@ -129,7 +130,56 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAddSkill = async () => {
+    if (!newSkill.trim()) return;
+    try {
+      const res = await fetch(`/api/users/${userId}/skills`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newSkill }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setProfile({ ...profile, skills: result.data });
+        setNewSkill("");
+        showNotification("Skill added", "success");
+      } else {
+        const result = await res.json();
+        showNotification(result.message, "error");
+      }
+    } catch (err) {
+      showNotification("Failed to add skill", "error");
+    }
+  };
 
+  const handleEndorse = async (skillName: string) => {
+    try {
+      const res = await fetch(`/api/users/${userId}/skills/${encodeURIComponent(skillName)}/endorse`, {
+        method: "PUT",
+      });
+      if (res.ok) {
+        const result = await res.json();
+        const updatedSkills = profile.skills.map((s: any) => {
+          if (s.name === result.data.skill) {
+            return {
+              ...s,
+              endorsements: result.data.isEndorsed 
+                ? [...s.endorsements, (session?.user as any).id]
+                : s.endorsements.filter((eId: string) => eId !== (session?.user as any).id)
+            };
+          }
+          return s;
+        });
+        setProfile({ ...profile, skills: updatedSkills });
+        showNotification(result.message, "success");
+      } else {
+        const result = await res.json();
+        showNotification(result.message, "error");
+      }
+    } catch (err) {
+      showNotification("Failed to endorse", "error");
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -317,6 +367,58 @@ export default function ProfilePage() {
           <Typography variant="body2" className="whitespace-pre-wrap text-blue-900">
             {profile.about || "Nothing to show yet."}
           </Typography>
+        )}
+      </Paper>
+
+      {/* Skills & Endorsements */}
+      <Paper className="rounded-xl p-6 shadow-sm border border-blue-100">
+        <Typography variant="h6" className="font-bold text-blue-900 mb-4">Skills</Typography>
+        
+        {isOwnProfile && (
+          <div className="flex gap-2 mb-6">
+            <TextField 
+              size="small" 
+              placeholder="Add a skill (e.g. React.js)" 
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              fullWidth
+            />
+            <Button variant="contained" color="primary" onClick={handleAddSkill}>Add</Button>
+          </div>
+        )}
+
+        {profile.skills && profile.skills.length === 0 ? (
+          <Typography className="text-blue-700">No skills added yet.</Typography>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {profile.skills?.map((skill: any) => {
+              const isEndorsedByMe = session && skill.endorsements.includes((session.user as any).id);
+              const isConnected = profile.networkStatus?.connectionStatus === "accepted";
+
+              return (
+                <div key={skill.name} className="flex justify-between items-center pb-2 border-b border-blue-50">
+                  <div>
+                    <Typography className="font-bold text-blue-900">{skill.name}</Typography>
+                    <Typography variant="caption" className="text-blue-600">
+                      {skill.endorsements.length} endorsement{skill.endorsements.length !== 1 ? 's' : ''}
+                    </Typography>
+                  </div>
+                  
+                  {!isOwnProfile && session && isConnected && (
+                    <Button 
+                      variant={isEndorsedByMe ? "contained" : "outlined"} 
+                      color="primary" 
+                      size="small" 
+                      className="rounded-full normal-case"
+                      onClick={() => handleEndorse(skill.name)}
+                    >
+                      {isEndorsedByMe ? "Endorsed" : "Endorse"}
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </Paper>
     </div>

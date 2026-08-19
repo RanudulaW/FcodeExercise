@@ -47,9 +47,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       showNotification(message, "info");
     });
 
+    // NOTE: In a full app, you might want a global message listener here 
+    // to increment an unread messages badge on the MessageIcon.
+
     setSocket(socketIo);
 
-    // Initial fetch for unread notifications count
     fetch('/api/notifications')
       .then(res => res.json())
       .then(data => {
