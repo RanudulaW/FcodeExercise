@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { SocketProvider } from "@/context/SocketContext";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
@@ -28,11 +29,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <NotificationProvider>
-          {children}
+          <SocketProvider>
+            {children}
+          </SocketProvider>
         </NotificationProvider>
       </ThemeProvider>
     </SessionProvider>
   );
 }
-
-

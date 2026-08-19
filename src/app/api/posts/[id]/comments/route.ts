@@ -5,6 +5,7 @@ import connectToDatabase from "@/lib/db";
 import { Comment } from "@/models/Comment";
 import { Post } from "@/models/Post";
 import { sendSuccess, sendError } from "@/lib/apiResponse";
+import { createNotification } from "@/lib/notificationHelper";
 
 export async function POST(
   req: Request,
@@ -38,6 +39,8 @@ export async function POST(
       content,
       parentComment: parentComment || null,
     });
+
+    await createNotification(post.author.toString(), authorId, "comment", post._id.toString());
 
     const populatedComment = await Comment.findById(newComment._id).populate("author", "name profilePicture");
 

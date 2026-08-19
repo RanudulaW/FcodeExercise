@@ -5,6 +5,7 @@ import connectToDatabase from "@/lib/db";
 import { Connection } from "@/models/Connection";
 import { Follow } from "@/models/Follow";
 import { sendSuccess, sendError } from "@/lib/apiResponse";
+import { createNotification } from "@/lib/notificationHelper";
 
 export async function PUT(req: Request) {
   try {
@@ -41,12 +42,19 @@ export async function PUT(req: Request) {
       connection.status = "accepted";
       await connection.save();
 
-      // Auto-follow back when accepted
+      // Auto follow back
       await Follow.findOneAndUpdate(
-        { follower: userId, following: connection.sender },
-        { follower: userId, following: connection.sender },
-        { upsert: true, new: true }
+        { follower: connection.receiver, following: connection.sender },
+        { follower: connection.receiver, following: connection.sender },
+        { upsert: true }
       );
+      await Follow.findOneAndUpdate(
+        { follower: connection.sender, following: connection.receiver },
+        { follower: connection.sender, following: connection.receiver },
+        { upsert: true }
+      );
+
+      await createNotification(connection.sender.toString(), userId, "connection_accepted", connection._id.toString());
 
       return sendSuccess(connection, "Connection request accepted");
     } else {

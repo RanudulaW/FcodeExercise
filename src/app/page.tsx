@@ -14,6 +14,9 @@ export default function Home() {
   
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observerTarget = useRef<HTMLDivElement>(null);
   
   const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -23,18 +26,42 @@ export default function Home() {
 
   useEffect(() => {
     if (session) {
-      fetchFeed();
+      fetchFeed(1);
     } else if (status === "unauthenticated") {
       setLoadingFeed(false);
     }
   }, [session, status]);
 
-  const fetchFeed = async () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loadingFeed) {
+          fetchFeed(page + 1);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loadingFeed, page]);
+
+  const fetchFeed = async (pageNum: number) => {
+    setLoadingFeed(true);
     try {
-      const res = await fetch("/api/posts");
+      const res = await fetch(`/api/posts?page=${pageNum}`);
       if (res.ok) {
         const result = await res.json();
-        setPosts(result.data);
+        if (pageNum === 1) {
+          setPosts(result.data.posts);
+        } else {
+          setPosts(prev => [...prev, ...result.data.posts]);
+        }
+        setHasMore(result.data.hasMore);
+        setPage(pageNum);
       }
     } catch (error) {
       console.error("Error fetching feed", error);
@@ -50,7 +77,6 @@ export default function Home() {
     let mediaUrl = "";
 
     try {
-      // 1. Upload image if selected
       if (selectedFile) {
         showNotification("Uploading media...", "info");
         const formData = new FormData();
@@ -72,7 +98,6 @@ export default function Home() {
         }
       }
 
-      // 2. Create the post
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,7 +106,7 @@ export default function Home() {
 
       if (res.ok) {
         const result = await res.json();
-        setPosts([result.data, ...posts]); // Add new post to top of feed
+        setPosts([result.data, ...posts]);
         setPostContent("");
         setSelectedFile(null);
         showNotification("Post created!", "success");
@@ -117,7 +142,6 @@ export default function Home() {
       </div>
       
       <div className="col-span-1 md:col-span-2">
-        {/* Create Post Box */}
         <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4 mb-4">
           <TextField 
             multiline
@@ -168,18 +192,22 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Feed */}
         <div className="flex flex-col gap-4">
-          {loadingFeed ? (
-            <div className="flex justify-center p-8"><CircularProgress /></div>
-          ) : posts.length === 0 ? (
+          {posts.length === 0 && !loadingFeed ? (
             <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-8 text-center">
               <Typography className="text-blue-800">Your feed is quiet. Connect with people or write a post!</Typography>
             </div>
           ) : (
-            posts.map(post => (
-              <PostCard key={post._id} post={post} currentUserId={(session.user as any).id} />
-            ))
+            <>
+              {posts.map(post => (
+                <PostCard key={post._id} post={post} currentUserId={(session.user as any).id} />
+              ))}
+              
+              <div ref={observerTarget} className="flex justify-center p-4">
+                {loadingFeed && <CircularProgress size={24} />}
+                {!hasMore && posts.length > 0 && <Typography className="text-blue-600">You've caught up!</Typography>}
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -49,6 +49,11 @@ export async function GET(req: Request) {
     await connectToDatabase();
 
     // Find all users the current user is following
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
     const following = await Follow.find({ follower: userId }).select("following");
     const followingIds = following.map(f => f.following);
 
@@ -57,11 +62,12 @@ export async function GET(req: Request) {
 
     const posts = await Post.find({ author: { $in: feedUserIds } })
       .sort({ createdAt: -1 })
-      .limit(20)
+      .skip(skip)
+      .limit(limit)
       .populate("author", "name headline profilePicture")
       .lean();
 
-    return sendSuccess(posts);
+    return sendSuccess({ posts, hasMore: posts.length === limit });
   } catch (error: any) {
     console.error("Feed fetch error:", error);
     return sendError("Internal server error", 500, error);

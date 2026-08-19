@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import connectToDatabase from "@/lib/db";
 import { Post } from "@/models/Post";
 import { sendSuccess, sendError } from "@/lib/apiResponse";
+import { createNotification } from "@/lib/notificationHelper";
 
 export async function PUT(
   req: Request,
@@ -38,6 +39,7 @@ export async function PUT(
     } else {
       // Like
       post.likes.push(userId);
+      await createNotification(post.author.toString(), userId, "like", post._id.toString());
     }
 
     await post.save();

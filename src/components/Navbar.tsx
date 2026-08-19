@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSession, signOut } from "next-auth/react";
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -9,20 +10,32 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
 import SearchIcon from '@mui/icons-material/Search';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkIcon from '@mui/icons-material/Work';
 import MessageIcon from '@mui/icons-material/Message';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { useSocket } from '@/context/SocketContext';
 
 const Navbar = () => {
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const { unreadCount } = useSocket();
+  
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <AppBar position="sticky" sx={{ backgroundColor: 'white', color: 'black', borderBottom: '1px solid #e8f3ff', boxShadow: 'none' }}>
@@ -39,6 +52,9 @@ const Navbar = () => {
               type="text" 
               placeholder="Search" 
               className="bg-transparent outline-none text-sm w-48 text-blue-900 placeholder-blue-300"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
             />
           </Box>
         </Box>
@@ -61,7 +77,9 @@ const Navbar = () => {
             <span className="text-xs font-medium mt-1">Messaging</span>
           </Link>
           <Link href="/notifications" className="flex flex-col items-center text-blue-400 hover:text-blue-600 transition-colors">
-            <NotificationsIcon />
+            <Badge badgeContent={unreadCount} color="error">
+              <NotificationsIcon />
+            </Badge>
             <span className="text-xs font-medium mt-1">Notifications</span>
           </Link>
 

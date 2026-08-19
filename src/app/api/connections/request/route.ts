@@ -6,6 +6,7 @@ import { Connection } from "@/models/Connection";
 import { Follow } from "@/models/Follow";
 import { User } from "@/models/User";
 import { sendSuccess, sendError } from "@/lib/apiResponse";
+import { createNotification } from "@/lib/notificationHelper";
 
 export async function POST(req: Request) {
   try {
@@ -58,6 +59,8 @@ export async function POST(req: Request) {
       { follower: senderId, following: receiverId },
       { upsert: true, new: true }
     );
+
+    await createNotification(receiverId, senderId, "connection_request", newConnection._id.toString());
 
     return sendSuccess(newConnection, "Connection request sent", 201);
   } catch (error: any) {
