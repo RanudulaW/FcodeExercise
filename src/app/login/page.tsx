@@ -4,22 +4,21 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { TextField, Button, Typography, Box, Paper, Alert } from "@mui/material";
+import { TextField, Button, Typography, Box, Paper } from "@mui/material";
+import { useNotification } from "@/context/NotificationContext";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const registered = searchParams.get("registered");
+  const { showNotification } = useNotification();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     const res = await signIn("credentials", {
       redirect: false,
@@ -30,8 +29,9 @@ function LoginForm() {
     setLoading(false);
 
     if (res?.error) {
-      setError("Invalid email or password");
+      showNotification("Invalid email or password", "error");
     } else {
+      showNotification("Successfully signed in", "success");
       router.push(callbackUrl);
       router.refresh();
     }
@@ -46,9 +46,6 @@ function LoginForm() {
         <Typography variant="body2" color="text.secondary" className="mb-6">
           Stay updated on your professional world
         </Typography>
-        
-        {registered && <Alert severity="success" className="mb-4">Registration successful! Please sign in.</Alert>}
-        {error && <Alert severity="error" className="mb-4">{error}</Alert>}
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <TextField
@@ -99,3 +96,4 @@ export default function Login() {
     </Suspense>
   );
 }
+

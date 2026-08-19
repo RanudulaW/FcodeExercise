@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { TextField, Button, Typography, Box, Paper, Alert } from "@mui/material";
+import { TextField, Button, Typography, Box, Paper } from "@mui/material";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function Register() {
   const router = useRouter();
+  const { showNotification } = useNotification();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -24,13 +24,14 @@ export default function Register() {
       });
 
       if (res.ok) {
-        router.push("/login?registered=true");
+        showNotification("Registration successful! Please sign in.", "success");
+        router.push("/login");
       } else {
         const data = await res.json();
-        setError(data.message || "Registration failed");
+        showNotification(data.message || "Registration failed", "error");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      showNotification("An unexpected error occurred", "error");
     } finally {
       setLoading(false);
     }
@@ -42,8 +43,6 @@ export default function Register() {
         <Typography variant="h5" component="h1" className="font-bold text-center mb-6">
           Make the most of your professional life
         </Typography>
-        
-        {error && <Alert severity="error" className="mb-4">{error}</Alert>}
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <TextField
@@ -95,3 +94,4 @@ export default function Register() {
     </Box>
   );
 }
+

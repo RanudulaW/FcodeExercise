@@ -5,11 +5,13 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { Avatar, Button, Typography, Paper, Box, TextField, Divider, CircularProgress, IconButton } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
+import { useNotification } from "@/context/NotificationContext";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const params = useParams();
   const userId = params.id as string;
+  const { showNotification } = useNotification();
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -62,11 +64,17 @@ export default function ProfilePage() {
         const result = await res.json();
         setProfile(result.data);
         setIsEditing(false);
+        showNotification("Profile updated successfully", "success");
+      } else {
+        const result = await res.json();
+        showNotification(result.message || "Failed to update profile", "error");
       }
     } catch (error) {
       console.error("Failed to update profile", error);
+      showNotification("An unexpected error occurred", "error");
     }
   };
+
 
 
   if (loading || status === "loading") {
