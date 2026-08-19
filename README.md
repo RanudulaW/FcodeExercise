@@ -21,6 +21,7 @@ A full-stack, feature-rich LinkedIn clone built using Next.js, React, Node.js, M
 - **Interactions**: Users can Like posts and engage in threaded, nested Commenting on posts.
 
 ### 4. Real-time Engine (WebSockets)
+- **Using WebSocket implemented real time message notification and real time chat** to power instantaneous events.
 - **Standalone Socket Server**: A parallel Node.js `socket.io` server powers real-time events.
 - **Live Notifications**: Instant push notifications for Likes, Comments, and Connection Requests. A global unread counter badge updates in the Navbar.
 - **Private Messaging**: A dedicated 1-on-1 instant messaging interface between active connections, featuring live delivery and double-check Read Receipts.
