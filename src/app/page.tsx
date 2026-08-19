@@ -8,39 +8,40 @@ export default function Home() {
       </div>
       
       <div className="col-span-1 md:col-span-2">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-          <p className="text-gray-500 font-medium">Start a post</p>
+        <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-4 mb-4">
+          <p className="text-blue-900 font-medium">Start a post</p>
           <div className="mt-4 flex gap-4">
-            <button className="flex items-center gap-2 text-gray-500 hover:bg-gray-100 p-2 rounded">
-              <span className="text-blue-500 font-bold">Photo</span>
+            <button className="flex items-center gap-2 text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors">
+              <span className="text-blue-600 font-bold">Photo</span>
             </button>
-            <button className="flex items-center gap-2 text-gray-500 hover:bg-gray-100 p-2 rounded">
-              <span className="text-green-500 font-bold">Video</span>
+            <button className="flex items-center gap-2 text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors">
+              <span className="text-blue-600 font-bold">Video</span>
             </button>
-            <button className="flex items-center gap-2 text-gray-500 hover:bg-gray-100 p-2 rounded">
-              <span className="text-orange-500 font-bold">Event</span>
+            <button className="flex items-center gap-2 text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors">
+              <span className="text-blue-600 font-bold">Event</span>
             </button>
-            <button className="flex items-center gap-2 text-gray-500 hover:bg-gray-100 p-2 rounded">
-              <span className="text-red-500 font-bold">Write article</span>
+            <button className="flex items-center gap-2 text-blue-800 hover:bg-blue-50 p-2 rounded transition-colors">
+              <span className="text-blue-600 font-bold">Write article</span>
             </button>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-          <p className="text-center text-gray-500">Your feed will appear here</p>
+        <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-4 mb-4">
+          <p className="text-center text-blue-800">Your feed will appear here</p>
         </div>
       </div>
       
       <div className="hidden md:block col-span-1">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 className="font-bold mb-2">LinkedIn News</h2>
-          <ul className="text-sm text-gray-600 space-y-2">
-            <li className="cursor-pointer hover:text-blue-600">Top news story 1</li>
-            <li className="cursor-pointer hover:text-blue-600">Top news story 2</li>
-            <li className="cursor-pointer hover:text-blue-600">Top news story 3</li>
+        <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-4">
+          <h2 className="font-bold mb-2 text-blue-900">LinkedIn News</h2>
+          <ul className="text-sm text-blue-800 space-y-2">
+            <li className="cursor-pointer hover:text-blue-600 hover:underline">Top news story 1</li>
+            <li className="cursor-pointer hover:text-blue-600 hover:underline">Top news story 2</li>
+            <li className="cursor-pointer hover:text-blue-600 hover:underline">Top news story 3</li>
           </ul>
         </div>
       </div>
     </div>
   );
 }
+

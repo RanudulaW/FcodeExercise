@@ -87,11 +87,11 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-4">
-      <Paper className="rounded-xl overflow-hidden shadow-sm border border-gray-200">
-        <div className="h-48 bg-gray-300 relative">
+      <Paper className="rounded-xl overflow-hidden shadow-sm border border-blue-100">
+        <div className="h-48 bg-blue-600 relative">
           {/* Cover photo */}
           {isOwnProfile && (
-            <IconButton className="absolute top-4 right-4 bg-white hover:bg-gray-100 shadow-sm" size="small">
+            <IconButton className="absolute top-4 right-4 bg-white hover:bg-blue-50 shadow-sm text-blue-600" size="small">
               <EditIcon fontSize="small" />
             </IconButton>
           )}
@@ -104,7 +104,7 @@ export default function ProfilePage() {
               className="w-32 h-32 border-4 border-white -mt-16 bg-white"
             />
             {isOwnProfile && !isEditing && (
-              <IconButton onClick={() => setIsEditing(true)} className="mt-4">
+              <IconButton onClick={() => setIsEditing(true)} className="mt-4 text-blue-600 hover:bg-blue-50">
                 <EditIcon />
               </IconButton>
             )}
@@ -131,22 +131,22 @@ export default function ProfilePage() {
                 fullWidth size="small"
               />
               <div className="flex gap-2 justify-end mt-2">
-                <Button variant="outlined" onClick={() => setIsEditing(false)}>Cancel</Button>
-                <Button variant="contained" onClick={handleSave}>Save</Button>
+                <Button variant="outlined" color="primary" onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button variant="contained" color="primary" onClick={handleSave}>Save</Button>
               </div>
             </div>
           ) : (
             <div className="mt-4">
-              <Typography variant="h5" className="font-bold">{profile.name}</Typography>
-              <Typography variant="body1" className="text-gray-800">{profile.headline || "Add a headline"}</Typography>
-              <Typography variant="body2" className="text-gray-500 mt-1">{profile.location || "Add location"}</Typography>
+              <Typography variant="h5" className="font-bold text-blue-900">{profile.name}</Typography>
+              <Typography variant="body1" className="text-blue-800">{profile.headline || "Add a headline"}</Typography>
+              <Typography variant="body2" className="text-blue-600 mt-1">{profile.location || "Add location"}</Typography>
               
               {!isOwnProfile && (
                 <div className="flex gap-2 mt-4">
-                  <Button variant="contained" className="bg-blue-600 rounded-full font-bold normal-case">
+                  <Button variant="contained" color="primary" className="rounded-full font-bold normal-case">
                     Connect
                   </Button>
-                  <Button variant="outlined" className="rounded-full font-bold normal-case">
+                  <Button variant="outlined" color="primary" className="rounded-full font-bold normal-case">
                     Message
                   </Button>
                 </div>
@@ -156,11 +156,11 @@ export default function ProfilePage() {
         </div>
       </Paper>
 
-      <Paper className="rounded-xl p-6 shadow-sm border border-gray-200">
+      <Paper className="rounded-xl p-6 shadow-sm border border-blue-100">
         <div className="flex justify-between items-center mb-4">
-          <Typography variant="h6" className="font-bold">About</Typography>
+          <Typography variant="h6" className="font-bold text-blue-900">About</Typography>
           {isOwnProfile && !isEditing && (
-            <IconButton onClick={() => setIsEditing(true)} size="small">
+            <IconButton onClick={() => setIsEditing(true)} size="small" className="text-blue-600 hover:bg-blue-50">
               <EditIcon fontSize="small" />
             </IconButton>
           )}
@@ -177,11 +177,11 @@ export default function ProfilePage() {
               placeholder="Tell us about yourself"
             />
             <div className="flex justify-end">
-              <Button variant="contained" size="small" onClick={handleSave}>Save</Button>
+              <Button variant="contained" color="primary" size="small" onClick={handleSave}>Save</Button>
             </div>
           </div>
         ) : (
-          <Typography variant="body2" className="whitespace-pre-wrap">
+          <Typography variant="body2" className="whitespace-pre-wrap text-blue-900">
             {profile.about || "Nothing to show yet."}
           </Typography>
         )}

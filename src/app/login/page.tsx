@@ -72,7 +72,7 @@ function LoginForm() {
             color="primary" 
             size="large" 
             disabled={loading}
-            className="mt-2 rounded-full font-bold bg-blue-600 hover:bg-blue-700 py-3"
+            className="mt-2 rounded-full font-bold py-3"
           >
             {loading ? "Signing in..." : "Sign in"}
           </Button>
