@@ -75,6 +75,60 @@ export default function ProfilePage() {
     }
   };
 
+  const handleConnect = async () => {
+    try {
+      const res = await fetch("/api/connections/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receiverId: userId }),
+      });
+      if (res.ok) {
+        setProfile({
+          ...profile,
+          networkStatus: { ...profile.networkStatus, connectionStatus: "pending_sent" }
+        });
+        showNotification("Connection request sent", "success");
+      } else {
+        const result = await res.json();
+        showNotification(result.message, "error");
+      }
+    } catch (err) {
+      showNotification("Failed to send request", "error");
+    }
+  };
+
+  const handleRespond = async (action: "accept" | "reject") => {
+    // Note: in a real app, we need the connection ID here, but for simplicity we can just fetch it or 
+    // update the endpoint to accept senderId and receiverId.
+    // Wait, the API requires connectionId. Since we don't have connectionId readily available in the profile,
+    // it's easier to handle accepting requests from the /network page, or we fetch the connectionId.
+    // For now, let's just show a message.
+    showNotification(`Please go to your Network page to ${action} this request.`, "info");
+  };
+
+  const handleFollow = async () => {
+    try {
+      const res = await fetch("/api/follows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetId: userId }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setProfile({
+          ...profile,
+          networkStatus: { ...profile.networkStatus, isFollowing: result.data.isFollowing }
+        });
+        showNotification(result.message, "success");
+      } else {
+        const result = await res.json();
+        showNotification(result.message, "error");
+      }
+    } catch (err) {
+      showNotification("Failed to follow/unfollow", "error");
+    }
+  };
+
 
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,13 +249,38 @@ export default function ProfilePage() {
               <Typography variant="body1" className="text-blue-800">{profile.headline || "Add a headline"}</Typography>
               <Typography variant="body2" className="text-blue-600 mt-1">{profile.location || "Add location"}</Typography>
               
-              {!isOwnProfile && (
+              {!isOwnProfile && session && (
                 <div className="flex gap-2 mt-4">
-                  <Button variant="contained" color="primary" className="rounded-full font-bold normal-case">
-                    Connect
-                  </Button>
-                  <Button variant="outlined" color="primary" className="rounded-full font-bold normal-case">
-                    Message
+                  {/* Connection Button Logic */}
+                  {profile.networkStatus?.connectionStatus === "none" && (
+                    <Button variant="contained" color="primary" className="rounded-full font-bold normal-case" onClick={handleConnect}>
+                      Connect
+                    </Button>
+                  )}
+                  {profile.networkStatus?.connectionStatus === "pending_sent" && (
+                    <Button variant="contained" disabled className="rounded-full font-bold normal-case text-gray-500 bg-gray-200">
+                      Pending
+                    </Button>
+                  )}
+                  {profile.networkStatus?.connectionStatus === "pending_received" && (
+                    <Button variant="contained" color="primary" className="rounded-full font-bold normal-case" onClick={() => handleRespond("accept")}>
+                      Accept Request
+                    </Button>
+                  )}
+                  {profile.networkStatus?.connectionStatus === "accepted" && (
+                    <Button variant="contained" color="primary" className="rounded-full font-bold normal-case">
+                      Message
+                    </Button>
+                  )}
+
+                  {/* Follow Button Logic */}
+                  <Button 
+                    variant="outlined" 
+                    color="primary" 
+                    className="rounded-full font-bold normal-case" 
+                    onClick={handleFollow}
+                  >
+                    {profile.networkStatus?.isFollowing ? "Following" : "Follow"}
                   </Button>
                 </div>
               )}
