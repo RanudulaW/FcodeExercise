@@ -77,6 +77,47 @@ export default function ProfilePage() {
 
 
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "profile");
+
+    try {
+      showNotification("Uploading...", "info");
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        // The upload API returns the relative path inside uploads/ e.g., profiles/123.jpg
+        const newPath = `/api/download/${result.data.path}`;
+        
+        // Save it to the user profile
+        const updateRes = await fetch(`/api/users/${userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profilePicture: newPath }),
+        });
+        
+        if (updateRes.ok) {
+          setProfile({ ...profile, profilePicture: newPath });
+          showNotification("Profile picture updated", "success");
+        } else {
+          showNotification("Failed to save profile picture", "error");
+        }
+      } else {
+        showNotification(result.message || "Failed to upload image", "error");
+      }
+    } catch (err) {
+      showNotification("An error occurred during upload", "error");
+    }
+  };
+
   if (loading || status === "loading") {
     return <Box className="flex justify-center mt-12"><CircularProgress /></Box>;
   }
@@ -99,10 +140,23 @@ export default function ProfilePage() {
         
         <div className="px-6 pb-6 relative">
           <div className="flex justify-between items-start">
-            <Avatar 
-              src={profile.profilePicture || ""} 
-              className="w-32 h-32 border-4 border-white -mt-16 bg-white"
-            />
+            <div className="relative group">
+              <Avatar 
+                src={profile.profilePicture || ""} 
+                className="w-32 h-32 border-4 border-white -mt-16 bg-white"
+              />
+              {isOwnProfile && (
+                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 cursor-pointer rounded-full transition-opacity w-32 h-32 -mt-16">
+                  <span className="text-xs font-bold">Change Photo</span>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/jpeg, image/png, image/webp" 
+                    onChange={handleImageUpload} 
+                  />
+                </label>
+              )}
+            </div>
             {isOwnProfile && !isEditing && (
               <IconButton onClick={() => setIsEditing(true)} className="mt-4 text-blue-600 hover:bg-blue-50">
                 <EditIcon />
